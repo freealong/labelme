@@ -161,6 +161,12 @@ class MainWindow(QMainWindow, WindowMixin):
                 'Ctrl+Q', 'quit', 'Quit application')
         open = action('&Open', self.openFile,
                 'Ctrl+O', 'open', 'Open image or label file')
+        opendir = action('&Open Dir', self.openDir,
+                         'Ctrl+u', 'open', 'Open Dir')
+        openNextImg = action('&Next Image', self.openNextImg,
+                             'n', 'next', u'Open Next')
+        openPrevImg = action('&Prev Image', self.openPrevImg,
+                             'p', 'prev', u'Open Prev')
         save = action('&Save', self.saveFile,
                 'Ctrl+S', 'save', 'Save labels to file', enabled=False)
         saveAs = action('&Save As', self.saveFileAs,
@@ -261,7 +267,7 @@ class MainWindow(QMainWindow, WindowMixin):
                 zoom=zoom, zoomIn=zoomIn, zoomOut=zoomOut, zoomOrg=zoomOrg,
                 fitWindow=fitWindow, fitWidth=fitWidth,
                 zoomActions=zoomActions,
-                fileMenuActions=(open,save,saveAs,close,quit),
+                fileMenuActions=(open,opendir,save,saveAs,close,quit),
                 beginner=(), advanced=(),
                 editMenu=(edit, copy, delete, None, color1, color2),
                 beginnerContext=(create, edit, copy, delete),
@@ -279,7 +285,7 @@ class MainWindow(QMainWindow, WindowMixin):
                 labelList=labelMenu)
 
         addActions(self.menus.file,
-                (open, self.menus.recentFiles, save, saveAs, close, None, quit))
+                (open, opendir, self.menus.recentFiles, save, saveAs, close, None, quit))
         addActions(self.menus.help, (help,))
         addActions(self.menus.view, (
             labels, advancedMode, None,
@@ -297,7 +303,7 @@ class MainWindow(QMainWindow, WindowMixin):
 
         self.tools = self.toolbar('Tools')
         self.actions.beginner = (
-            open, save, None, create, copy, delete, None,
+            open, opendir, openNextImg, openPrevImg, save, None, create, copy, delete, None,
             zoomIn, zoom, zoomOut, fitWindow, fitWidth)
 
         self.actions.advanced = (
@@ -324,6 +330,7 @@ class MainWindow(QMainWindow, WindowMixin):
         # Restore application settings.
         self.settings = {}
         self.recentFiles = self.settings.get('recentFiles', [])
+        self.lastOpenDir = self.settings.get('lastOpenDir', None)
         size = self.settings.get('window/size', QSize(600, 500))
         position = self.settings.get('window/position', QPoint(0, 0))
         self.resize(size)
@@ -753,14 +760,82 @@ class MainWindow(QMainWindow, WindowMixin):
         s['line/color'] = self.lineColor
         s['fill/color'] = self.fillColor
         s['recentFiles'] = self.recentFiles
+        s['lastOpenDir'] = self.lastOpenDir
         s['advanced'] = not self._beginner
         # ask the use for where to save the labels
         #s['window/geometry'] = self.saveGeometry()
+
+    def scanAllImages(self, folderPath):
+        extensions = {'.jpeg','.jpg', '.png', '.bmp'}
+        images = []
+
+        for root, dirs, files in os.walk(folderPath):
+            for file in files:
+                if file.lower().endswith(tuple(extensions)):
+                    relatviePath = os.path.join(root, file)
+                    images.append(os.path.abspath(relatviePath))
+        images.sort(key=lambda x: x.lower())
+        return images
 
     ## User Dialogs ##
 
     def loadRecent(self, filename):
         if self.mayContinue():
+            self.loadFile(filename)
+
+    def openDir(self, _value=False):
+        if not self.mayContinue():
+            return
+
+        path = os.path.dirname(str(self.filename)) \
+            if self.filename else '.'
+
+        if self.lastOpenDir is not None and len(self.lastOpenDir) > 1:
+            path = self.lastOpenDir
+
+        dirpath = QFileDialog.getExistingDirectory(self,
+            '%s - Open Directory' % __appname__, path,  QFileDialog.ShowDirsOnly
+                                                | QFileDialog.DontResolveSymlinks)
+
+        if dirpath is not None and len(dirpath) > 1:
+            self.lastOpenDir = dirpath
+
+        self.dirname = dirpath
+        self.mImgList = self.scanAllImages(dirpath)
+        self.filename = None
+        self.openNextImg()
+
+    def openPrevImg(self, _value=False):
+        if not self.mayContinue():
+            return
+
+        if len(self.mImgList) <= 0:
+            return
+
+        if self.filename is None:
+            return
+
+        currIndex = self.mImgList.index(self.filename)
+        if currIndex -1 >= 0:
+            filename = self.mImgList[currIndex-1]
+            if filename:
+                self.loadFile(filename)
+
+    def openNextImg(self, _value=False):
+        if not self.mayContinue():
+            return
+
+        if len(self.mImgList) <= 0:
+            return
+
+        if self.filename is None:
+            filename = self.mImgList[0]
+        else:
+            currIndex = self.mImgList.index(self.filename)
+            if currIndex + 1 < len(self.mImgList):
+                filename = self.mImgList[currIndex+1]
+
+        if filename:
             self.loadFile(filename)
 
     def openFile(self, _value=False):
