@@ -561,7 +561,7 @@ class MainWindow(QMainWindow, WindowMixin):
 
         shapes = [format_shape(shape) for shape in self.canvas.shapes]
         try:
-            lf.save(filename, shapes, str(self.filename), self.imageData,
+            lf.save(filename, shapes, str(self.filename),
                 self.lineColor.getRgb(), self.fillColor.getRgb())
             self.labelFile = lf
             self.filename = filename
@@ -662,7 +662,8 @@ class MainWindow(QMainWindow, WindowMixin):
                     # FIXME: PyQt4 installed via Anaconda fails to load JPEG
                     # and JSON encoded images.
                     # https://github.com/ContinuumIO/anaconda-issues/issues/131
-                    if QImage.fromData(self.labelFile.imageData).isNull():
+                    self.imageData = read(self.labelFile.imagePath, None)
+                    if QImage.fromData(self.imageData).isNull():
                         raise LabelFileError(
                             'Failed loading image data from label file.\n'
                             'Maybe this is a known issue of PyQt4 built on'
@@ -674,7 +675,6 @@ class MainWindow(QMainWindow, WindowMixin):
                             % (e, filename))
                     self.status("Error reading %s" % filename)
                     return False
-                self.imageData = self.labelFile.imageData
                 self.lineColor = QColor(*self.labelFile.lineColor)
                 self.fillColor = QColor(*self.labelFile.fillColor)
             else:
@@ -962,3 +962,6 @@ def main():
     win.show()
     win.raise_()
     sys.exit(app.exec_())
+
+if __name__ == '__main__':
+    main()

@@ -33,49 +33,37 @@ class LabelFile(object):
     def __init__(self, filename=None):
         self.shapes = ()
         self.imagePath = None
-        self.imageData = None
         if filename is not None:
             self.load(filename)
 
-    def load(self, filename):
+    def load(self, filename, data_path=None):
         try:
             with open(filename, 'rb') as f:
                 data = json.load(f)
                 imagePath = data['imagePath']
-                if six.PY3:
-                    imageData = b64decode(data['imageData']).decode('utf-8')
-                elif six.PY2:
-                    imageData = b64decode(data['imageData'])
-                else:
-                    raise RuntimeError('Unsupported Python version.')
                 lineColor = data['lineColor']
                 fillColor = data['fillColor']
                 shapes = ((s['label'], s['points'], s['line_color'], s['fill_color'])\
                         for s in data['shapes'])
                 # Only replace data after everything is loaded.
                 self.shapes = shapes
-                self.imagePath = imagePath
-                self.imageData = imageData
+                if data_path is None:
+                    self.imagePath = imagePath
+                else:
+                    self.imagePath = os.path.join(data_path, os.path.split(imagePath)[-1])
                 self.lineColor = lineColor
                 self.fillColor = fillColor
         except Exception as e:
             raise LabelFileError(e)
 
-    def save(self, filename, shapes, imagePath, imageData,
+    def save(self, filename, shapes, imagePath,
             lineColor=None, fillColor=None):
         try:
             with open(filename, 'wb') as f:
-                if six.PY3:
-                    imageData = b64encode(imageData.encode('utf-8'))
-                elif six.PY2:
-                    imageData = b64encode(imageData)
-                else:
-                    raise RuntimeError('Unsupported Python version.')
                 json.dump(dict(
                     shapes=shapes,
                     lineColor=lineColor, fillColor=fillColor,
-                    imagePath=imagePath,
-                    imageData=imageData),
+                    imagePath=imagePath),
                     f, ensure_ascii=True, indent=2)
         except Exception as e:
             raise LabelFileError(e)

@@ -5,3 +5,5 @@ dist/
 
 icons/.DS_Store
 labelme/resources.py
+
+.idea/*
