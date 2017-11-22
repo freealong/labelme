@@ -21,9 +21,6 @@ from base64 import b64encode, b64decode
 import json
 import os.path
 
-import six
-
-
 class LabelFileError(Exception):
     pass
 
@@ -38,8 +35,10 @@ class LabelFile(object):
 
     def load(self, filename, data_path=None):
         try:
-            with open(filename, 'rb') as f:
+            with open(filename) as f:
                 data = json.load(f)
+                width = data['width']
+                height = data['height']
                 imagePath = data['imagePath']
                 lineColor = data['lineColor']
                 fillColor = data['fillColor']
@@ -53,14 +52,18 @@ class LabelFile(object):
                     self.imagePath = os.path.join(data_path, os.path.split(imagePath)[-1])
                 self.lineColor = lineColor
                 self.fillColor = fillColor
+                self.width = width
+                self.height = height
         except Exception as e:
             raise LabelFileError(e)
 
     def save(self, filename, shapes, imagePath,
+             width, height,
             lineColor=None, fillColor=None):
         try:
             with open(filename, 'wb') as f:
                 json.dump(dict(
+                    width=width, height=height,
                     shapes=shapes,
                     lineColor=lineColor, fillColor=fillColor,
                     imagePath=imagePath),

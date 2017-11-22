@@ -562,7 +562,8 @@ class MainWindow(QMainWindow, WindowMixin):
         shapes = [format_shape(shape) for shape in self.canvas.shapes]
         try:
             lf.save(filename, shapes, str(self.filename),
-                self.lineColor.getRgb(), self.fillColor.getRgb())
+                    self.image.width(), self.image.height(),
+                    self.lineColor.getRgb(), self.fillColor.getRgb())
             self.labelFile = lf
             self.filename = filename
             return True
