@@ -66,7 +66,7 @@ class LabelDialog(QDialog):
         else:
             self.edit.setText(self.edit.text().trimmed())
 
-    def popUp(self, text='', move=True):
+    def popUp(self, text='pad', move=True):
         self.edit.setText(text)
         self.edit.setSelection(0, len(text))
         self.edit.setFocus(Qt.PopupFocusReason)

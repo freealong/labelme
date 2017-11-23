@@ -102,6 +102,7 @@ class MainWindow(QMainWindow, WindowMixin):
         self.screencastViewer = "firefox"
         self.screencast = "screencast.ogv"
 
+        self.dirname = None
         # Main widgets and related state.
         self.labelDialog = LabelDialog(parent=self)
 
@@ -572,7 +573,7 @@ class MainWindow(QMainWindow, WindowMixin):
                     self.image.width(), self.image.height(),
                     self.lineColor.getRgb(), self.fillColor.getRgb())
             self.labelFile = lf
-            self.filename = filename
+            # self.filename = filename
             return True
         except LabelFileError as e:
             self.errorMessage('Error saving label data',
@@ -796,9 +797,10 @@ class MainWindow(QMainWindow, WindowMixin):
         dirpath = QFileDialog.getExistingDirectory(self,
             '%s - Open Directory' % __appname__, path,  QFileDialog.ShowDirsOnly
                                                 | QFileDialog.DontResolveSymlinks)
-
-        if dirpath is not None and len(dirpath) > 1:
+        if dirpath is not None and len(dirpath) > 1 and dirpath != self.dirname:
             self.lastOpenDir = dirpath
+        else:
+            return
 
         self.dirname = dirpath
         self.mImgList = self.scanAllImages(dirpath)
