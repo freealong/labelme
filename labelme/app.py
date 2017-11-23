@@ -794,9 +794,9 @@ class MainWindow(QMainWindow, WindowMixin):
         if self.lastOpenDir is not None and len(self.lastOpenDir) > 1:
             path = self.lastOpenDir
 
-        dirpath = QFileDialog.getExistingDirectory(self,
+        dirpath = str(QFileDialog.getExistingDirectory(self,
             '%s - Open Directory' % __appname__, path,  QFileDialog.ShowDirsOnly
-                                                | QFileDialog.DontResolveSymlinks)
+                                                | QFileDialog.DontResolveSymlinks))
         if dirpath is not None and len(dirpath) > 1 and dirpath != self.dirname:
             self.lastOpenDir = dirpath
         else:
