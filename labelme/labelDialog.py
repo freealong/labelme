@@ -27,7 +27,7 @@ except ImportError:
     from PyQt4.QtCore import *
     PYQT5 = False
 
-from .lib import newIcon, labelValidator
+from lib import newIcon, labelValidator
 
 # TODO:
 # - Calculate optimal position so as not to go out of screen area.

@@ -27,7 +27,7 @@ except ImportError:
     from PyQt4.QtCore import *
 
 
-from .lib import distance
+from lib import distance
 
 # TODO:
 # - [opt] Store paths instead of creating new ones at each paint.

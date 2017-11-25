@@ -27,8 +27,8 @@ except ImportError:
     from PyQt4.QtCore import *
     PYQT5 = False
 
-from labelme.shape import Shape
-from labelme.lib import distance
+from shape import Shape
+from lib import distance
 
 # TODO:
 # - [maybe] Find optimal epsilon value.
