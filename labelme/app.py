@@ -38,7 +38,7 @@ except ImportError:
     from PyQt4.QtCore import *
     PYQT5 = False
 
-from labelme import resources
+#from labelme import resources
 from labelme.lib import struct, newAction, newIcon, addActions, fmtShortcut
 from labelme.shape import Shape, DEFAULT_LINE_COLOR, DEFAULT_FILL_COLOR
 from labelme.canvas import Canvas
