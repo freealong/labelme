@@ -61,7 +61,7 @@ class LabelFile(object):
              width, height,
             lineColor=None, fillColor=None):
         try:
-            with open(filename, 'wb') as f:
+            with open(filename, 'w') as f:
                 json.dump(dict(
                     width=width, height=height,
                     shapes=shapes,
